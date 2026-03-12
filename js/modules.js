@@ -26,7 +26,7 @@ export const MODULES = {
         name: 'Reflection Agent (Self-Correction)',
         nodes: [
             { type: 'text-input', x: 60, y: 60, data: { value: 'Tell me a short, funny joke about chickens.' } },
-            { type: 'system-prompt', x: 60, y: 260, data: { value: 'You are a comedian agent. Fulfill the user request. If you receive previous attempts/feedback (Context), review them and try to generate a better, funnier response that meets the evaluation criteria.' } },
+            { type: 'system-prompt', x: 60, y: 260, data: { value: 'You are a comedian agent. Fulfill the user request. If you receive previous attempts (Context), they were rejected by the evaluator. Study them carefully and create a genuinely different, funnier response — do not repeat a previous attempt.' } },
             { type: 'history-manager', x: 760, y: 560 },
             { type: 'llm-call', x: 400, y: 200 },
             { type: 'ai-evaluator', x: 760, y: 200, data: { criteria: 'Is the input a joke about chickens? Is it short (less than 3 sentences)? Does it contain a clear punchline? If yes to all, PASS. If FAIL, provide feedback on why it failed (e.g. "Too long", "Not about chickens").'}},
@@ -34,13 +34,13 @@ export const MODULES = {
             { type: 'stop-signal', x: 1100, y: 160 }
         ],
         connections: [
-            { from: 0, fromPort: 0, to: 3, toPort: 1 },
-            { from: 1, fromPort: 0, to: 3, toPort: 0 },
-            { from: 3, fromPort: 0, to: 4, toPort: 0 },
-            { from: 4, fromPort: 0, to: 5, toPort: 0 },
-            { from: 4, fromPort: 0, to: 6, toPort: 0 },
-            { from: 4, fromPort: 1, to: 2, toPort: 0 },
-            { from: 2, fromPort: 0, to: 3, toPort: 2 },
+            { from: 0, fromPort: 0, to: 3, toPort: 1 },  // Text Input → LLM (User Prompt)
+            { from: 1, fromPort: 0, to: 3, toPort: 0 },  // System Prompt → LLM
+            { from: 3, fromPort: 0, to: 4, toPort: 0 },  // LLM Response → AI Evaluator
+            { from: 3, fromPort: 0, to: 5, toPort: 0 },  // LLM Response → Display (every cycle, shows last attempt)
+            { from: 3, fromPort: 0, to: 2, toPort: 0 },  // LLM Response → History (store attempts, not just feedback)
+            { from: 4, fromPort: 0, to: 6, toPort: 0 },  // AI Evaluator Pass → Stop Signal (halt loop on success)
+            { from: 2, fromPort: 0, to: 3, toPort: 2 },  // History (attempts array) → LLM (Context)
         ]
     },
     'interactive-web-gen': {
