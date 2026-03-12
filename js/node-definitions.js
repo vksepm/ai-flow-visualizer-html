@@ -14,6 +14,11 @@ export function createModelSelectorHTML(node) {
     `;
 }
 
+// NODE_DEFINITIONS is the single source of truth for the node library.
+// Each entry's `description` is read verbatim by the AI assistant (assistant.js)
+// to understand what each node does — keep descriptions accurate.
+// `content` is a function (not a string) so it receives the live `node` object
+// to pre-populate saved `data` values when restoring a serialized flow.
 export const NODE_DEFINITIONS = {
     // --- Inputs/Media ---
     'text-input': {

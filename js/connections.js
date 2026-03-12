@@ -47,6 +47,8 @@ export function getPortCoords(portEl) {
 }
 
 export function drawConnection(pathId, start, end, status = '') {
+    // tension controls the Bezier curve's horizontal pull. 0.6 keeps connections
+    // readable even when source and destination are close vertically.
     const tension = 0.6;
     const controlOffset = Math.max(50, Math.abs(end.x - start.x) * tension);
     const controlX1 = start.x + controlOffset;
@@ -105,6 +107,8 @@ export function createConnection(fromNodeId, fromPortIndex, toNodeId, toPortInde
     const toPortId = `${toNodeId}_in_${toPortIndex}`;
     const connId = `conn_${fromNodeId}_${fromPortIndex}_to_${toNodeId}_${toPortIndex}`;
 
+    // connId encodes both endpoints, so an ID check is sufficient to prevent
+    // duplicate connections without iterating all port combinations.
     if (state.connections.some(c => c.id === connId)) return;
 
     state.connections.push({ id: connId, fromNode: fromNodeId, fromPortIndex, fromPortId, toNode: toNodeId, toPortIndex, toPortId });
@@ -153,6 +157,8 @@ export function endConnection(endNode, endPortIndex) {
 
     const toPortId = `${endNode.id}_in_${endPortIndex}`;
 
+    // Each input port accepts only one connection — multiple inputs would be
+    // ambiguous during execution since executeNode expects a single value per slot.
     if (state.connections.some(c => c.toPortId === toPortId)) {
         showToast("Input port is already connected.", "error");
         return;

@@ -5,7 +5,8 @@ import { renderDisplayValueContent, extractTextFromPDF } from './display.js';
 import { showToast, setStatus, showModalDialog } from './ui.js';
 import { addMessageToChatUI, runStringFormatter, calculateMath } from './node-initializers.js';
 
-// Helper for JSON path
+// Resolves dot-and-bracket paths like "data[0].name" into a value.
+// Used by json-parser to extract fields without eval().
 const getDeep = (obj, path) => {
     const keys = path.replace(/\[(\w+)\]/g, '.$1').split('.');
     let result = obj;
@@ -254,6 +255,10 @@ ${typeof inputToEvaluate === 'object' ? JSON.stringify(inputToEvaluate) : String
                 break;
             }
 
+            // llm-call assembles a multimodal parts array manually instead of using
+            // callGeminiAPI() because it needs to merge text, inline images, and
+            // conversation history into one user turn, and prepend a system prompt
+            // as a synthetic prior turn (user: system-prompt, model: "Understood.").
             case 'llm-call': {
                 const parts = [];
 
@@ -418,7 +423,9 @@ ${typeof inputToEvaluate === 'object' ? JSON.stringify(inputToEvaluate) : String
                 break;
         }
 
-        // Store output
+        // conditional-logic and ai-evaluator output a {index, data} routing object —
+        // always preserved because executeFlowCycle reads .index to route downstream
+        // data. Clearing it would break branching on the cycle they execute.
         if (node.type === 'conditional-logic' || node.type === 'ai-evaluator') {
             node.outputBuffer = output;
         } else if ((!STATEFUL_NODE_TYPES.includes(node.type) && !CYCLE_BREAKER_TYPES.includes(node.type)) || output !== null) {

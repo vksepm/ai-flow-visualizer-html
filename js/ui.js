@@ -15,6 +15,10 @@ export function setStatus(statusState, text) {
     statusText.textContent = text;
 }
 
+// Returns a Promise: resolves with the input value (or true for confirm-only),
+// rejects with 'Dialog cancelled by user.' on dismiss.
+// Callers must catch the rejection; execution-engine.js uses this sentinel string
+// to distinguish user cancellation from real errors.
 export function showModalDialog(title, message, showInput = true) {
     return new Promise((resolve, reject) => {
         const dialogId = `modal-dialog-${Date.now()}`;
@@ -108,7 +112,6 @@ export function showSettingsModal() {
         state.userGeminiApiKey = newApiKey;
         state.globalDefaultModel = newModel;
 
-        // Persist settings to localStorage
         localStorage.setItem('aiflow_settings_apiKey', newApiKey);
         localStorage.setItem('aiflow_settings_defaultModel', newModel);
 
@@ -117,6 +120,8 @@ export function showSettingsModal() {
     });
 }
 
+// Category order is hardcoded to match the intended panel reading order.
+// NODE_DEFINITIONS drives content; this only controls presentation grouping.
 export function populateNodeLibrary() {
     nodeLibraryList.innerHTML = '';
     const categories = {};

@@ -1,5 +1,7 @@
 import { state, DEFAULT_ENV_MODEL } from './state.js';
 
+// Resolution order: node-level model override → user's global default → DEFAULT_ENV_MODEL.
+// Throws if no API key is set so callers get a clear error rather than a silent 401.
 export function getLLMConfig(nodeSpecificModel = null) {
     const apiKey = state.userGeminiApiKey;
 
@@ -22,6 +24,8 @@ export async function callGeminiAPI(prompt, jsonSchema = null, modelOverride = n
         contents: [{ role: "user", parts: [{ text: prompt }] }]
     };
 
+    // Passing a responseSchema activates Gemini's constrained decoding (structured output).
+    // Without it the model returns free text; with it the response is guaranteed-valid JSON.
     if (jsonSchema) {
         payload.generationConfig = {
             responseMimeType: "application/json",
@@ -43,6 +47,8 @@ export async function callGeminiAPI(prompt, jsonSchema = null, modelOverride = n
         try {
             const errBody = await response.json();
             if (errBody?.error?.message) errorMessage = errBody.error.message;
+        // Swallow JSON parse errors — the HTTP status message is a sufficient fallback
+        // and the error body may be plain text (e.g. from an intermediary proxy).
         } catch (_) {}
         throw new Error(`Gemini API Error (${config.modelId}): ${errorMessage}`);
     }

@@ -343,6 +343,9 @@ export function initStringFormatter(node) {
     runStringFormatter(node);
 }
 
+// Called on every template keystroke. Diffs current ports against variable names
+// extracted from the template; reconnects preserved connections by name so
+// renaming a variable doesn't silently break the graph.
 function updateFormatterInputsFromTemplate(node) {
     const template = node.data.template || '';
     const regex = /\{([^{}]+)\}/g; let match;
@@ -397,6 +400,8 @@ export function runStringFormatter(node, inputData = {}) {
 
 // --- History Manager ---
 export function initHistoryManagerNode(node) {
+    // internalState.buffer is the only durable state this node owns across cycles.
+    // The execution engine never clears it — only the user's Clear button does.
     if (!node.internalState.buffer) {
         node.internalState.buffer = [];
     }

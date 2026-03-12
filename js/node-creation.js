@@ -15,6 +15,9 @@ export function createNode(type, x, y, data = {}, id = null) {
     const def = NODE_DEFINITIONS[type]; if (!def) return null;
     const nodeId = id || `node_${type}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
+    // Deep-clone inputs/outputs/data from NODE_DEFINITIONS so each node instance
+    // has its own copy. Without this, string-formatter's dynamic port mutations
+    // would corrupt the shared definition object.
     const node = {
         id: nodeId,
         type,
@@ -59,7 +62,6 @@ export function createNode(type, x, y, data = {}, id = null) {
 
     rebuildNodeIO(node);
 
-    // Type-specific initialization logic
     if (type === 'file-upload') { nodeEl.querySelector(`#file-upload-${nodeId}`).addEventListener('change', (e) => handleFileSelect(e, node)); }
     if (type === 'string-formatter') { initStringFormatter(node); }
     if (type === 'webcam-capture') { initWebcamNode(node); }
@@ -123,6 +125,8 @@ export function copyNodeOutput(node) {
 export function rebuildNodeIO(node) {
     const content = node.el.querySelector('.node-content');
 
+    // Guard prevents duplicate port elements if rebuildNodeIO is called more than
+    // once on the same node (e.g. during loadFlow).
     if (node.el.querySelector('.node-io')) return;
 
     let ioHtml = '';

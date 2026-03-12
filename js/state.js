@@ -50,6 +50,10 @@ export const CYCLE_RESULT = {
     PAUSED_FOR_INPUT: 'paused_for_input'
 };
 
+// STATEFUL_NODE_TYPES nodes keep their outputBuffer across cycles and skip
+// incoming-edge cycle detection, enabling persistent state (e.g. history accumulation).
+// CYCLE_BREAKER_TYPES nodes skip outgoing-edge detection so a user-interaction node
+// can sit in a loop without triggering the cycle guard.
 export const STATEFUL_NODE_TYPES = ['history-manager'];
 export const CYCLE_BREAKER_TYPES = ['chat-terminal', 'chat-interface'];
 

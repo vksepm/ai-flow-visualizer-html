@@ -33,7 +33,6 @@ export function renderDisplayValueContent(element, data) {
         return;
     }
 
-    // Handle File/Media objects
     if (typeof data === 'object' && data.mimeType && data.data) {
         if (data.mimeType === 'application/pdf') { renderPdfInElement(element, `data:application/pdf;base64,${data.data}`, `pdf-viewer-${element.closest('.node').id}`); return; }
         const dataUrl = `data:${data.mimeType};base64,${data.data}`;
@@ -41,13 +40,13 @@ export function renderDisplayValueContent(element, data) {
         if (data.mimeType.startsWith('audio/')) { element.innerHTML = `<audio controls src="${dataUrl}" style="width:100%;"></audio>`; return; }
     }
 
-    // Handle generated image data URLs
     if (typeof data === 'string' && data.startsWith('data:image')) { element.innerHTML = `<img src="${data}" alt="Generated or Captured Image">`; return; }
 
-    // Handle text, numbers, HTML, and markdown
     if (typeof data === 'string' || typeof data === 'number') {
         let content = String(data);
 
+        // Strip a single wrapping fenced code block before rendering as markdown.
+        // LLMs frequently wrap HTML output in ```html ... ``` even when instructed not to.
         const codeBlockRegex = /^```(?:\w*\n)?([\s\S]*?)```$/;
         const match = content.trim().match(codeBlockRegex);
 
@@ -64,6 +63,8 @@ export function renderDisplayValueContent(element, data) {
                 nodeEl.classList.add('expanded-for-html');
             }
 
+            // srcdoc renders HTML in an isolated browsing context — prevents injected
+            // scripts from accessing the parent page's DOM or canvas state.
             const iframe = document.createElement('iframe');
             iframe.srcdoc = content;
             iframe.style.width = '100%';
@@ -79,7 +80,6 @@ export function renderDisplayValueContent(element, data) {
         return;
     }
 
-    // Handle generic objects/arrays (JSON)
     if (typeof data === 'object') {
         if (Array.isArray(data)) {
             const formattedHistory = data.map((item, index) => `[${index + 1}]: ${item}`).join('\n\n');
@@ -107,6 +107,8 @@ function renderPdfInElement(element, pdfDataSource, viewerId) {
     }).catch(err => { console.error("PDF Load Error:", err); element.innerHTML = "Error loading PDF."; });
 }
 
+// PDF.js renders one page at a time. queueRenderPage defers the next render
+// until the current one finishes, preventing overlapping canvas draws.
 function queueRenderPage(viewerId) {
     const pdfState = state.pdfViewerStates[viewerId];
     if (!pdfState.pageRendering) renderPdfPage(viewerId); else pdfState.pageNumPending = pdfState.pageNum;

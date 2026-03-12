@@ -43,6 +43,9 @@ export async function handleChatSubmit(e) {
     await getAssistantResponse(thinkingEl);
 }
 
+// Returns a minimal structural snapshot for the LLM's context window.
+// Intentionally omits outputBuffer and internalState — runtime values
+// are irrelevant to layout decisions and would inflate the prompt.
 function getCanvasState() {
     return {
         nodes: state.nodes.map(n => ({ id: n.id, type: n.type, position: { x: n.el.offsetLeft, y: n.el.offsetTop }, data: n.data })),
@@ -52,6 +55,9 @@ function getCanvasState() {
 
 function applyCanvasChanges(args) {
     if (args.clear_first) clearCanvas();
+    // idMap translates the LLM's temporary string IDs (e.g. "node_1") to the
+    // runtime IDs assigned by createNode(). Connections reference LLM IDs
+    // and must be remapped before calling createConnection().
     const idMap = {};
     if (args.nodes_to_create) {
         args.nodes_to_create.forEach(nodeDef => {
@@ -87,6 +93,9 @@ async function getAssistantResponse(thinkingEl) {
         'ai-evaluator': { criteria: 'string (Rules for PASS/FAIL judgment)'}
     };
 
+    // Build a compact node reference for the system prompt. NODE_DEFINITIONS.description
+    // alone doesn't describe the `data` key shapes the LLM must populate, so
+    // NODE_DATA_SCHEMAS supplements it with the config object structure.
     const conciseDefs = {};
     Object.entries(NODE_DEFINITIONS).forEach(([key, value]) => {
         let description = `[${key}] ${value.title}: ${value.description}`;
@@ -189,6 +198,9 @@ ${JSON.stringify(getCanvasState(), null, 2)}`;
         else if (!toolCallMade) assistantResponseText = "I couldn't determine how to modify the canvas from that. Could you rephrase?";
 
         addChatMessage(assistantResponseText, 'assistant');
+        // Push the full candidate.content (not just text) because Gemini's multi-turn
+        // function-calling protocol requires the assistant turn — including any
+        // functionCall parts — to appear verbatim in the next request's history.
         state.chatHistory.push(candidate.content);
     } catch (err) {
         console.error("Assistant API error:", err);

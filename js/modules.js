@@ -118,9 +118,15 @@ export function clearCanvas() {
     resetSvgConnections();
     state.nodes = [];
     state.connections = [];
+    // PDF viewer state holds canvas refs tied to DOM elements about to be destroyed.
+    // Clearing it prevents stale refs from triggering renders against detached canvases.
     state.pdfViewerStates = {};
 }
 
+// Handles two serialization formats:
+//   - Saved flows (storage.js): connections use {fromNode, toNode, fromPortIndex, toPortIndex}
+//   - Predefined modules (MODULES above): connections use {from, to, fromPort, toPort}
+// nodeMap handles both: saved flows key by string ID, modules by integer index.
 export function loadFlow(flowDefinition, flowName) {
     clearCanvas();
 
@@ -148,6 +154,8 @@ export function loadFlow(flowDefinition, flowName) {
         }
 
         if (fromNode && toNode) {
+            // toPortName allows module definitions to wire string-formatter ports by variable
+            // name rather than index, surviving template edits that reorder ports.
             if (c.toPortName) {
                 const dynamicIndex = toNode.inputs.findIndex(input => input.name === c.toPortName);
                 if (dynamicIndex !== -1) toPortIndex = dynamicIndex;

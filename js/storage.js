@@ -4,6 +4,9 @@ import { loadFlow } from './modules.js';
 
 const STORAGE_PREFIX = 'aiflow_';
 
+// Serializes only structural state: positions, types, config data.
+// Runtime state (outputBuffer, internalState, el) is intentionally excluded —
+// it is meaningless across sessions and would bloat saved files.
 export function serializeFlow() {
     return {
         nodes: state.nodes.map(n => ({
@@ -72,7 +75,6 @@ export function showLoadFlowDialog() {
         return;
     }
 
-    // Sort by date (newest first)
     savedFlows.sort((a, b) => {
         const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
         const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
@@ -105,7 +107,6 @@ export function showLoadFlowDialog() {
     dialog.innerHTML = listHtml;
     document.body.appendChild(dialog);
 
-    // Delete buttons
     dialog.querySelectorAll('.delete-saved-flow-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -121,7 +122,6 @@ export function showLoadFlowDialog() {
         });
     });
 
-    // Load on click
     dialog.querySelectorAll('.load-flow-item').forEach(item => {
         item.addEventListener('mouseenter', () => item.style.backgroundColor = 'var(--button-hover-bg)');
         item.addEventListener('mouseleave', () => item.style.backgroundColor = 'transparent');

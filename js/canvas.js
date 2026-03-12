@@ -32,14 +32,12 @@ function startCanvasPan(e) {
 }
 
 export function setupCanvasEventListeners() {
-    // Canvas panning on mousedown
     canvas.addEventListener('mousedown', (e) => {
         if (e.target.id === 'node-canvas' || e.target.id === 'canvas-wrapper' || e.target.closest('svg#connections-layer')) {
             startCanvasPan(e);
         }
     });
 
-    // Global mouse move handler
     document.addEventListener('mousemove', (e) => {
         if (state.isPanning) {
             state.panZoom.x = e.clientX - state.dragStart.x;
@@ -74,7 +72,6 @@ export function setupCanvasEventListeners() {
         }
     });
 
-    // Global mouse up handler
     document.addEventListener('mouseup', (e) => {
         if (state.isConnecting) {
             const potential = document.getElementById('potential-connection');
@@ -89,13 +86,16 @@ export function setupCanvasEventListeners() {
         document.body.classList.remove('grabbing');
     });
 
-    // Zoom and pan via mouse wheel
     canvas.addEventListener('wheel', (e) => {
+        // Don't hijack scroll inside scrollable node content or iframes —
+        // let those elements handle their own wheel events.
         if (e.target.closest('.node-chat-messages') || e.target.closest('.display-value-content') || e.target.tagName === 'IFRAME') {
             return;
         }
 
         e.preventDefault();
+        // Plain scroll pans the canvas. Ctrl/Cmd+scroll zooms.
+        // On macOS, pinch-to-zoom fires as wheel with ctrlKey=true.
         if (!e.ctrlKey && !e.metaKey) {
             state.panZoom.x -= e.deltaX;
             state.panZoom.y -= e.deltaY;
@@ -110,13 +110,14 @@ export function setupCanvasEventListeners() {
         const mx = e.clientX - r.left;
         const my = e.clientY - r.top;
 
+        // Zoom-to-cursor: adjust pan so the point under the cursor stays fixed.
+        // Formula: newPan = cursorPos - (cursorPos - oldPan) * (newScale / oldScale)
         state.panZoom.x = mx - (mx - state.panZoom.x) * (newScale / state.panZoom.scale);
         state.panZoom.y = my - (my - state.panZoom.y) * (newScale / state.panZoom.scale);
         state.panZoom.scale = newScale;
         updateTransform();
     });
 
-    // Drag and Drop from Node Library
     canvas.addEventListener('dragover', (e) => { e.preventDefault(); });
     canvas.addEventListener('drop', (e) => {
         e.preventDefault();
@@ -124,6 +125,8 @@ export function setupCanvasEventListeners() {
         if (!NODE_DEFINITIONS[nodeType]) return;
 
         const rect = canvas.getBoundingClientRect();
+        // Convert client coords to canvas-space by removing the pan offset
+        // and dividing by scale, matching the CSS transform in updateTransform().
         const x = (e.clientX - rect.left - state.panZoom.x) / state.panZoom.scale;
         const y = (e.clientY - rect.top - state.panZoom.y) / state.panZoom.scale;
         createNode(nodeType, x, y);

@@ -18,8 +18,14 @@ export function getExecutionOrder() {
         visiting.add(nodeId);
 
         state.connections.filter(c => c.toNode === nodeId).forEach(conn => {
+            // Skip incoming edges for STATEFUL nodes so history-manager can sit in a cycle.
+            // Its prior-cycle output is already in outputBuffer; predecessors don't need
+            // to be ordered before it.
             if (STATEFUL_NODE_TYPES.includes(currentNode.type)) return;
             const sourceNode = state.nodes.find(n => n.id === conn.fromNode);
+            // Skip outgoing edges from CYCLE_BREAKER nodes (chat-terminal, chat-interface)
+            // so they can appear downstream of nodes they'd otherwise form a cycle with.
+            // These nodes yield control to the user before their output is consumed.
             if (sourceNode && CYCLE_BREAKER_TYPES.includes(sourceNode.type)) return;
             visit(conn.fromNode);
         });
@@ -177,6 +183,8 @@ async function runAutonomousLoop() {
         }
 
         if (state.currentCycleCount < state.maxAutonomousCycles && !state.stopAutonomousExecution) {
+            // Brief pause lets the browser repaint node state changes and gives the
+            // stop button a chance to register before the next cycle begins.
             await new Promise(resolve => setTimeout(resolve, 500));
         }
     }

@@ -10,6 +10,7 @@ import { MODULES, loadModule } from './modules.js';
 import { saveFlow, showLoadFlowDialog, exportFlow, importFlow } from './storage.js';
 import { toggleChat, handleChatSubmit } from './assistant.js';
 
+// Sorts modules alphabetically, always placing 'blank' last.
 function populateModulesMenu() {
     modulesDropdownContent.innerHTML = '';
     const sortedKeys = Object.keys(MODULES).sort((a, b) => {
@@ -39,6 +40,8 @@ function init() {
 
     // Load the reflection loop by default
     loadModule('reflection-agent-loop');
+    // Default to autonomous mode to match the reflection-agent-loop example,
+    // which requires multiple cycles to converge.
     autonomousToggle.checked = true;
     state.isAutonomousMode = true;
 
@@ -47,23 +50,18 @@ function init() {
 
     // --- Event Listeners ---
 
-    // Run/Stop button
     runButton.addEventListener('click', startExecution);
 
-    // Zoom buttons
     zoomInBtn.addEventListener('click', () => { state.panZoom.scale = Math.min(MAX_ZOOM, state.panZoom.scale * 1.2); updateTransform(); });
     zoomOutBtn.addEventListener('click', () => { state.panZoom.scale = Math.max(MIN_ZOOM, state.panZoom.scale / 1.2); updateTransform(); });
 
-    // Snap to grid toggle
     snapGridBtn.addEventListener('click', () => {
         state.snapToGrid = !state.snapToGrid;
         snapGridBtn.classList.toggle('active', state.snapToGrid);
     });
 
-    // Settings
     settingsBtn.addEventListener('click', showSettingsModal);
 
-    // Modules dropdown
     modulesDropdownBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         const isOpen = modulesDropdownContent.style.display === 'block';
@@ -80,13 +78,11 @@ function init() {
         }
     });
 
-    // Save/Load/Export/Import
     saveFlowBtn.addEventListener('click', saveFlow);
     loadFlowBtn.addEventListener('click', showLoadFlowDialog);
     exportFlowBtn.addEventListener('click', exportFlow);
     importFlowBtn.addEventListener('click', importFlow);
 
-    // Autonomous mode controls
     autonomousToggle.addEventListener('change', () => {
         state.isAutonomousMode = autonomousToggle.checked;
     });
@@ -94,7 +90,6 @@ function init() {
         state.maxAutonomousCycles = parseInt(maxCyclesInput.value) || 5;
     });
 
-    // AI Chat Assistant
     aiChatFab.addEventListener('click', () => toggleChat(true));
     closeChatBtn.addEventListener('click', () => toggleChat(false));
     chatForm.addEventListener('submit', handleChatSubmit);
