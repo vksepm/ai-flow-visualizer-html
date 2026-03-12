@@ -49,6 +49,14 @@ body {
 
 body.grabbing { cursor: grabbing; }
 
+/* Prevent CLS when icon font loads: fallback ligature text (e.g. "play_arrow") is
+   clipped to the reserved 1em width, so no layout shift occurs when the font swaps in. */
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    overflow: hidden;
+    width: 1em;
+}
+
 /* --- Header & Toolbar --- */
 .header {
     background-color: var(--node-bg); padding: 8px 16px;

@@ -1,5 +1,10 @@
 import { state } from './state.js';
 
+if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
 export async function extractTextFromPDF(base64Data) {
     const pdfData = atob(base64Data);
     const pdfDoc = await pdfjsLib.getDocument({data: pdfData}).promise;
