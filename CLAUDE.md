@@ -15,9 +15,9 @@ There are no install steps, build commands, lint commands, or test commands.
 
 ```
 ai-flow-visualizer/
-├── index.html                 # Slim HTML shell (126 lines) — markup, CDN links, module entry
+├── index.html                 # Slim HTML shell (122 lines) — markup, CDN links, module entry
 ├── css/
-│   └── styles.css             # All CSS (522 lines)
+│   └── styles.css             # All CSS (551 lines)
 └── js/
     ├── main.js                # Entry point: init(), wires all event listeners
     ├── state.js               # DOM refs, constants, shared mutable state object
