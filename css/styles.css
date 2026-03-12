@@ -174,13 +174,9 @@ svg#connections-layer { position: absolute; top: 0; left: 0; width: 100%; height
     pointer-events: stroke;
     cursor: pointer;
 }
-.connection-label {
-    fill: var(--secondary-text);
-    font-size: 10px;
-    font-family: var(--font-ui);
-    pointer-events: none;
-    opacity: 0.55;
-    transition: opacity 0.2s;
+.io-port.port-selected {
+    background-color: var(--connection-selected-color);
+    box-shadow: 0 0 0 3px rgba(66, 165, 245, 0.3);
 }
 
 @keyframes flow { to { stroke-dashoffset: -14; } }

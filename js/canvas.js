@@ -1,5 +1,5 @@
 import { state, canvas, canvasWrapper, MIN_ZOOM, MAX_ZOOM, GRID_SIZE } from './state.js';
-import { updateAllConnections, drawConnection, getPortCoords } from './connections.js';
+import { updateAllConnections, drawConnection, getPortCoords, clearPortHighlights } from './connections.js';
 import { NODE_DEFINITIONS } from './node-definitions.js';
 import { createNode } from './node-creation.js';
 
@@ -16,6 +16,7 @@ export function startNodeDrag(e, node) {
     state.nodes.forEach(n => { if (n.id !== node.id) n.el.style.zIndex = 10; });
     if (state.selectedConnectionId) {
         document.getElementById(state.selectedConnectionId)?.classList.remove('selected');
+        clearPortHighlights();
         state.selectedConnectionId = null;
     }
 }
@@ -27,6 +28,7 @@ function startCanvasPan(e) {
     document.body.classList.add('grabbing');
     if (state.selectedConnectionId) {
         document.getElementById(state.selectedConnectionId)?.classList.remove('selected');
+        clearPortHighlights();
         state.selectedConnectionId = null;
     }
 }

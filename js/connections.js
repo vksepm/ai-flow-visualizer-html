@@ -1,6 +1,5 @@
 import { state } from './state.js';
 import { showToast } from './ui.js';
-import { NODE_DEFINITIONS } from './node-definitions.js';
 
 let svgConnections = document.getElementById('connections-layer');
 
@@ -12,31 +11,6 @@ export function resetSvgConnections() {
     svgConnections = document.getElementById('connections-layer');
 }
 
-function getPortName(nodeId, isOutput, portIndex) {
-    const node = state.nodes.find(n => n.id === nodeId);
-    if (!node) return '';
-    const def = NODE_DEFINITIONS[node.type];
-    if (!def) return '';
-    const ports = isOutput ? def.outputs : def.inputs;
-    return ports?.[portIndex]?.name || '';
-}
-
-function updateConnectionLabel(labelId, coords, text, anchor) {
-    if (!text) return;
-    const safeId = labelId.replace(/[^a-zA-Z0-9_-]/g, '_');
-    let label = document.getElementById(safeId);
-    if (!label) {
-        label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        label.setAttribute('id', safeId);
-        label.setAttribute('class', 'connection-label');
-        svgConnections.appendChild(label);
-    }
-    const offsetX = anchor === 'start' ? 10 : -10;
-    label.setAttribute('x', coords.x + offsetX);
-    label.setAttribute('y', coords.y - 8);
-    label.setAttribute('text-anchor', anchor);
-    label.textContent = text;
-}
 
 export function getPortCoords(portEl) {
     const node = portEl.closest('.node');
@@ -93,11 +67,6 @@ export function updateAllConnections() {
             const currentPath = document.getElementById(c.id);
             const isActive = currentPath ? currentPath.classList.contains('active') : false;
             drawConnection(c.id, startCoords, endCoords, isActive ? 'active' : '');
-
-            const fromLabel = getPortName(c.fromNode, true, c.fromPortIndex);
-            const toLabel = getPortName(c.toNode, false, c.toPortIndex);
-            updateConnectionLabel(`${c.id}_lbl_from`, startCoords, fromLabel, 'start');
-            updateConnectionLabel(`${c.id}_lbl_to`, endCoords, toLabel, 'end');
         }
     });
 }
@@ -117,22 +86,31 @@ export function createConnection(fromNodeId, fromPortIndex, toNodeId, toPortInde
 export function deleteConnection(connectionId) {
     const index = state.connections.findIndex(c => c.id === connectionId);
     if (index > -1) {
+        if (state.selectedConnectionId === connectionId) clearPortHighlights();
         state.connections.splice(index, 1);
-        const safeId = connectionId.replace(/[^a-zA-Z0-9_-]/g, '_');
         document.getElementById(connectionId)?.remove();
         document.getElementById(`${connectionId}_hit`)?.remove();
-        document.getElementById(`${safeId}_lbl_from`)?.remove();
-        document.getElementById(`${safeId}_lbl_to`)?.remove();
     }
+}
+
+export function clearPortHighlights() {
+    document.querySelectorAll('.io-port.port-selected').forEach(p => p.classList.remove('port-selected'));
 }
 
 function selectConnection(e, connectionId) {
     e.stopPropagation();
     document.querySelectorAll('.connection-path.selected').forEach(p => p.classList.remove('selected'));
+    clearPortHighlights();
 
     state.selectedConnectionId = connectionId;
     const path = document.getElementById(connectionId);
     if (path) path.classList.add('selected');
+
+    const conn = state.connections.find(c => c.id === connectionId);
+    if (conn) {
+        document.getElementById(conn.fromPortId)?.classList.add('port-selected');
+        document.getElementById(conn.toPortId)?.classList.add('port-selected');
+    }
 }
 
 export function startConnection(e, node, portIndex) {
@@ -152,6 +130,8 @@ export function endConnection(endNode, endPortIndex) {
 
     if (state.connectionStartPort.node.id === endNode.id) {
         showToast("Cannot connect a node to itself.", "error");
+        document.getElementById('potential-connection')?.remove();
+        state.isConnecting = false;
         return;
     }
 
@@ -161,6 +141,8 @@ export function endConnection(endNode, endPortIndex) {
     // ambiguous during execution since executeNode expects a single value per slot.
     if (state.connections.some(c => c.toPortId === toPortId)) {
         showToast("Input port is already connected.", "error");
+        document.getElementById('potential-connection')?.remove();
+        state.isConnecting = false;
         return;
     }
 
