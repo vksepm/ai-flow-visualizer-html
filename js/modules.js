@@ -8,11 +8,11 @@ export const MODULES = {
     'autonomous-agent-loop': {
         name: 'Autonomous Agent Loop (Thinking)',
         nodes: [
-            { type: 'text-input', x: 50, y: 50, data: { value: 'Generate a numbered list of 5 ideas for a new sci-fi movie.' } },
-            { type: 'system-prompt', x: 50, y: 250, data: { value: 'You are an autonomous agent. Your task is provided by the user. You must think step-by-step. If you receive history (Context/Media), review it and continue the task based on the previous steps. Respond with your next thought or action.' } },
-            { type: 'history-manager', x: 400, y: 450 },
-            { type: 'llm-call', x: 750, y: 200 },
-            { type: 'display-value', x: 1100, y: 450 }
+            { type: 'text-input', x: 60, y: 60, data: { value: 'Generate a numbered list of 5 ideas for a new sci-fi movie.' } },
+            { type: 'system-prompt', x: 60, y: 260, data: { value: 'You are an autonomous agent. Your task is provided by the user. You must think step-by-step. If you receive history (Context/Media), review it and continue the task based on the previous steps. Respond with your next thought or action.' } },
+            { type: 'history-manager', x: 400, y: 460 },
+            { type: 'llm-call', x: 760, y: 200 },
+            { type: 'display-value', x: 1100, y: 460 }
         ],
         connections: [
             { from: 0, fromPort: 0, to: 3, toPort: 1 },
@@ -25,13 +25,13 @@ export const MODULES = {
     'reflection-agent-loop': {
         name: 'Reflection Agent (Self-Correction)',
         nodes: [
-            { type: 'text-input', x: 50, y: 50, data: { value: 'Tell me a short, funny joke about chickens.' } },
-            { type: 'system-prompt', x: 50, y: 250, data: { value: 'You are a comedian agent. Fulfill the user request. If you receive previous attempts/feedback (Context), review them and try to generate a better, funnier response that meets the evaluation criteria.' } },
-            { type: 'history-manager', x: 750, y: 550 },
+            { type: 'text-input', x: 60, y: 60, data: { value: 'Tell me a short, funny joke about chickens.' } },
+            { type: 'system-prompt', x: 60, y: 260, data: { value: 'You are a comedian agent. Fulfill the user request. If you receive previous attempts/feedback (Context), review them and try to generate a better, funnier response that meets the evaluation criteria.' } },
+            { type: 'history-manager', x: 760, y: 560 },
             { type: 'llm-call', x: 400, y: 200 },
-            { type: 'ai-evaluator', x: 750, y: 200, data: { criteria: 'Is the input a joke about chickens? Is it short (less than 3 sentences)? Does it contain a clear punchline? If yes to all, PASS. If FAIL, provide feedback on why it failed (e.g. "Too long", "Not about chickens").'}},
-            { type: 'display-value', x: 1100, y: 350 },
-            { type: 'stop-signal', x: 1100, y: 150 }
+            { type: 'ai-evaluator', x: 760, y: 200, data: { criteria: 'Is the input a joke about chickens? Is it short (less than 3 sentences)? Does it contain a clear punchline? If yes to all, PASS. If FAIL, provide feedback on why it failed (e.g. "Too long", "Not about chickens").'}},
+            { type: 'display-value', x: 1100, y: 360 },
+            { type: 'stop-signal', x: 1100, y: 160 }
         ],
         connections: [
             { from: 0, fromPort: 0, to: 3, toPort: 1 },
@@ -46,19 +46,19 @@ export const MODULES = {
     'interactive-web-gen': {
         name: 'Interactive Webpage Generator',
         nodes: [
-            { type: 'text-input', x: 50, y: 80, data: { value: 'A landing page for a new coffee shop called "The Daily Grind".' } },
-            { type: 'system-prompt', x: 50, y: 320, data: { value: 'You are an expert web developer specializing in modern, clean designs. Based on the user\'s request, create a complete, single-file HTML document using TailwindCSS (include the CDN script in the head). The webpage should be visually appealing and responsive. Respond with only the HTML code, starting with <!DOCTYPE html>. Do not wrap the HTML in a markdown code block (no ```).' } },
-            { type: 'llm-call', x: 450, y: 220 },
-            { type: 'display-value', x: 850, y: 220 }
+            { type: 'text-input', x: 60, y: 80, data: { value: 'A landing page for a new coffee shop called "The Daily Grind".' } },
+            { type: 'system-prompt', x: 60, y: 320, data: { value: 'You are an expert web developer specializing in modern, clean designs. Based on the user\'s request, create a complete, single-file HTML document using TailwindCSS (include the CDN script in the head). The webpage should be visually appealing and responsive. Respond with only the HTML code, starting with <!DOCTYPE html>. Do not wrap the HTML in a markdown code block (no ```).' } },
+            { type: 'llm-call', x: 460, y: 220 },
+            { type: 'display-value', x: 860, y: 220 }
         ],
         connections: [ { from: 0, fromPort: 0, to: 2, toPort: 1 }, { from: 1, fromPort: 0, to: 2, toPort: 0 }, { from: 2, fromPort: 0, to: 3, toPort: 0 } ]
     },
     'sentiment-analysis-example': {
         name: 'Sentiment Analysis Example',
         nodes: [
-            { type: 'text-input', x: 50, y: 50, data: { value: 'I absolutely loved the new feature! It works perfectly and saved me hours of work. Highly recommended.' } },
+            { type: 'text-input', x: 60, y: 60, data: { value: 'I absolutely loved the new feature! It works perfectly and saved me hours of work. Highly recommended.' } },
             { type: 'sentiment-analysis', x: 400, y: 100 },
-            { type: 'display-value', x: 750, y: 100 }
+            { type: 'display-value', x: 760, y: 100 }
         ],
         connections: [
             { from: 0, fromPort: 0, to: 1, toPort: 0 },
@@ -68,10 +68,10 @@ export const MODULES = {
     'pdf-q-and-a': {
         name: 'PDF Question & Answer (Simple)',
         nodes: [
-            { type: 'file-upload', x: 50, y: 80 },
-            { type: 'text-input', x: 50, y: 280, data: { value: 'What is the main conclusion of this document?' } },
+            { type: 'file-upload', x: 60, y: 80 },
+            { type: 'text-input', x: 60, y: 280, data: { value: 'What is the main conclusion of this document?' } },
             { type: 'string-formatter', x: 400, y: 180, data: { template: "Based on the following document context, please answer the user's question.\n\nDOCUMENT CONTEXT:\n{document_text}\n\nUSER QUESTION:\n{question}" } },
-            { type: 'llm-call', x: 750, y: 180 },
+            { type: 'llm-call', x: 760, y: 180 },
             { type: 'display-value', x: 1100, y: 180 }
         ],
         connections: [
@@ -84,12 +84,12 @@ export const MODULES = {
     'visual-storyteller-combined': {
         name: 'Visual Storyteller (Combined Output)',
         nodes: [
-            { type: 'text-input', x: 50, y: 50, data: { value: 'A robot finding a flower.' } },
-            { type: 'system-prompt', x: 50, y: 250, data: { value: 'Write a short, evocative paragraph describing the scene requested by the user.' } },
-            { type: 'llm-call', x: 400, y: 50, data: {} },
+            { type: 'text-input', x: 60, y: 60, data: { value: 'A robot finding a flower.' } },
+            { type: 'system-prompt', x: 60, y: 260, data: { value: 'Write a short, evocative paragraph describing the scene requested by the user.' } },
+            { type: 'llm-call', x: 400, y: 60, data: {} },
             { type: 'image-gen', x: 400, y: 300, data: {} },
-            { type: 'code-runner', x: 750, y: 150, data: { code: "return `<h2>The Story:</h2><p>${inputA}</p><h2>The Image:</h2><img src='${inputB}' style='max-width:100%;'/>`;" } },
-            { type: 'display-value', x: 1100, y: 150 }
+            { type: 'code-runner', x: 760, y: 160, data: { code: "return `<h2>The Story:</h2><p>${inputA}</p><h2>The Image:</h2><img src='${inputB}' style='max-width:100%;'/>`;" } },
+            { type: 'display-value', x: 1100, y: 160 }
         ],
         connections: [
             { from: 0, fromPort: 0, to: 2, toPort: 1 },
@@ -103,10 +103,10 @@ export const MODULES = {
     'api-data-processing': {
         name: 'API Data Processing (Example)',
         nodes: [
-            { type: 'web-request', x: 50, y: 50, data: { url: 'https://jsonplaceholder.typicode.com/todos/1', method: 'GET' } },
-            { type: 'json-parser', x: 400, y: 50, data: { path: 'title' } },
-            { type: 'code-runner', x: 700, y: 50, data: { code: 'return inputA.toUpperCase() + "!";' } },
-            { type: 'display-value', x: 1000, y: 50 }
+            { type: 'web-request', x: 60, y: 60, data: { url: 'https://jsonplaceholder.typicode.com/todos/1', method: 'GET' } },
+            { type: 'json-parser', x: 400, y: 60, data: { path: 'title' } },
+            { type: 'code-runner', x: 700, y: 60, data: { code: 'return inputA.toUpperCase() + "!";' } },
+            { type: 'display-value', x: 1000, y: 60 }
         ],
         connections: [ { from: 0, fromPort: 0, to: 1, toPort: 0 }, { from: 1, fromPort: 0, to: 2, toPort: 0 }, { from: 2, fromPort: 0, to: 3, toPort: 0 } ]
     },

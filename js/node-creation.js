@@ -1,4 +1,4 @@
-import { state, canvasWrapper, GRID_SIZE } from './state.js';
+import { state, canvasWrapper } from './state.js';
 import { NODE_DEFINITIONS } from './node-definitions.js';
 import { startConnection, endConnection, updateAllConnections } from './connections.js';
 import { showToast } from './ui.js';
@@ -31,11 +31,8 @@ export function createNode(type, x, y, data = {}, id = null) {
     const nodeEl = document.createElement('div');
     nodeEl.className = 'node'; nodeEl.id = nodeId;
 
-    const finalX = state.snapToGrid ? Math.round(x / GRID_SIZE) * GRID_SIZE : x;
-    const finalY = state.snapToGrid ? Math.round(y / GRID_SIZE) * GRID_SIZE : y;
-
-    nodeEl.style.left = `${finalX}px`;
-    nodeEl.style.top = `${finalY}px`;
+    nodeEl.style.left = `${x}px`;
+    nodeEl.style.top = `${y}px`;
 
     nodeEl.innerHTML = `
         <div class="node-header">

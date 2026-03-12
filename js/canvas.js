@@ -1,4 +1,4 @@
-import { state, canvas, canvasWrapper, MIN_ZOOM, MAX_ZOOM, GRID_SIZE } from './state.js';
+import { state, canvas, canvasWrapper, MIN_ZOOM, MAX_ZOOM } from './state.js';
 import { updateAllConnections, drawConnection, getPortCoords, clearPortHighlights } from './connections.js';
 import { NODE_DEFINITIONS } from './node-definitions.js';
 import { createNode } from './node-creation.js';
@@ -52,11 +52,6 @@ export function setupCanvasEventListeners() {
 
             let newX = state.activeNode.el.offsetLeft + dx;
             let newY = state.activeNode.el.offsetTop + dy;
-
-            if (state.snapToGrid) {
-                newX = Math.round(newX / GRID_SIZE) * GRID_SIZE;
-                newY = Math.round(newY / GRID_SIZE) * GRID_SIZE;
-            }
 
             state.activeNode.el.style.left = `${newX}px`;
             state.activeNode.el.style.top = `${newY}px`;

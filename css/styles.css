@@ -76,6 +76,7 @@ body.grabbing { cursor: grabbing; }
 .toolbar-button:hover { background-color: var(--button-hover-bg); }
 .toolbar-button:disabled { opacity: 0.5; cursor: not-allowed; }
 .toolbar-button.active { background-color: var(--accent-color); color: var(--button-primary-text); border-color: var(--accent-color); }
+.control-btn.active { background-color: var(--accent-color); color: var(--button-primary-text); border-color: var(--accent-color); }
 
 .run-button {
     background-color: var(--button-primary-bg); color: var(--button-primary-text);

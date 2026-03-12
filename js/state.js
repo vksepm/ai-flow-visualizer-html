@@ -28,7 +28,6 @@ export const chatForm = document.getElementById('chat-form');
 export const chatInput = document.getElementById('chat-input');
 
 // --- Constants ---
-export const GRID_SIZE = 20;
 export const MIN_ZOOM = 0.2;
 export const MAX_ZOOM = 2.5;
 export const DEFAULT_ENV_MODEL = 'gemini-3.1-flash-lite-preview';
@@ -78,8 +77,6 @@ export const state = {
 
     userGeminiApiKey: '',
     globalDefaultModel: DEFAULT_ENV_MODEL,
-
-    snapToGrid: false,
 
     // Pan/Zoom State
     panZoom: { scale: 1, x: 0, y: 0 },

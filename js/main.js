@@ -9,6 +9,7 @@ import { startExecution } from './execution-engine.js';
 import { MODULES, loadModule } from './modules.js';
 import { saveFlow, showLoadFlowDialog, exportFlow, importFlow } from './storage.js';
 import { toggleChat, handleChatSubmit } from './assistant.js';
+import { autoLayoutFlow } from './layout.js';
 
 // Sorts modules alphabetically, always placing 'blank' last.
 function populateModulesMenu() {
@@ -56,8 +57,9 @@ function init() {
     zoomOutBtn.addEventListener('click', () => { state.panZoom.scale = Math.max(MIN_ZOOM, state.panZoom.scale / 1.2); updateTransform(); });
 
     snapGridBtn.addEventListener('click', () => {
-        state.snapToGrid = !state.snapToGrid;
-        snapGridBtn.classList.toggle('active', state.snapToGrid);
+        autoLayoutFlow();
+        snapGridBtn.classList.add('active');
+        setTimeout(() => snapGridBtn.classList.remove('active'), 600);
     });
 
     settingsBtn.addEventListener('click', showSettingsModal);
