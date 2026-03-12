@@ -1,5 +1,6 @@
 import { state } from './state.js';
 import { showToast } from './ui.js';
+import { NODE_DEFINITIONS } from './node-definitions.js';
 
 let svgConnections = document.getElementById('connections-layer');
 
@@ -11,6 +12,32 @@ export function resetSvgConnections() {
     svgConnections = document.getElementById('connections-layer');
 }
 
+function getPortName(nodeId, isOutput, portIndex) {
+    const node = state.nodes.find(n => n.id === nodeId);
+    if (!node) return '';
+    const def = NODE_DEFINITIONS[node.type];
+    if (!def) return '';
+    const ports = isOutput ? def.outputs : def.inputs;
+    return ports?.[portIndex]?.name || '';
+}
+
+function updateConnectionLabel(labelId, coords, text, anchor) {
+    if (!text) return;
+    const safeId = labelId.replace(/[^a-zA-Z0-9_-]/g, '_');
+    let label = document.getElementById(safeId);
+    if (!label) {
+        label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('id', safeId);
+        label.setAttribute('class', 'connection-label');
+        svgConnections.appendChild(label);
+    }
+    const offsetX = anchor === 'start' ? 10 : -10;
+    label.setAttribute('x', coords.x + offsetX);
+    label.setAttribute('y', coords.y - 8);
+    label.setAttribute('text-anchor', anchor);
+    label.textContent = text;
+}
+
 export function getPortCoords(portEl) {
     const node = portEl.closest('.node');
     return {
@@ -20,6 +47,26 @@ export function getPortCoords(portEl) {
 }
 
 export function drawConnection(pathId, start, end, status = '') {
+    const tension = 0.6;
+    const controlOffset = Math.max(50, Math.abs(end.x - start.x) * tension);
+    const controlX1 = start.x + controlOffset;
+    const controlX2 = end.x - controlOffset;
+    const d = `M ${start.x} ${start.y} C ${controlX1} ${start.y}, ${controlX2} ${end.y}, ${end.x} ${end.y}`;
+
+    // Hit area (wider, transparent — easier to click)
+    if (pathId !== 'potential-connection') {
+        const hitId = `${pathId}_hit`;
+        let hit = document.getElementById(hitId);
+        if (!hit) {
+            hit = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            hit.setAttribute('id', hitId);
+            hit.setAttribute('class', 'connection-hit-area');
+            hit.addEventListener('click', (e) => selectConnection(e, pathId));
+            svgConnections.insertBefore(hit, svgConnections.firstChild);
+        }
+        hit.setAttribute('d', d);
+    }
+
     let path = document.getElementById(pathId);
     if (!path) {
         path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -31,13 +78,7 @@ export function drawConnection(pathId, start, end, status = '') {
     }
     const isSelected = path.classList.contains('selected');
     path.setAttribute('class', `connection-path ${status} ${isSelected ? 'selected' : ''}`);
-
-    const tension = 0.6;
-    const controlOffset = Math.max(50, Math.abs(end.x - start.x) * tension);
-    const controlX1 = start.x + controlOffset;
-    const controlX2 = end.x - controlOffset;
-
-    path.setAttribute('d', `M ${start.x} ${start.y} C ${controlX1} ${start.y}, ${controlX2} ${end.y}, ${end.x} ${end.y}`);
+    path.setAttribute('d', d);
 }
 
 export function updateAllConnections() {
@@ -45,9 +86,16 @@ export function updateAllConnections() {
         const start = document.getElementById(c.fromPortId);
         const end = document.getElementById(c.toPortId);
         if (start && end) {
+            const startCoords = getPortCoords(start);
+            const endCoords = getPortCoords(end);
             const currentPath = document.getElementById(c.id);
             const isActive = currentPath ? currentPath.classList.contains('active') : false;
-            drawConnection(c.id, getPortCoords(start), getPortCoords(end), isActive ? 'active' : '');
+            drawConnection(c.id, startCoords, endCoords, isActive ? 'active' : '');
+
+            const fromLabel = getPortName(c.fromNode, true, c.fromPortIndex);
+            const toLabel = getPortName(c.toNode, false, c.toPortIndex);
+            updateConnectionLabel(`${c.id}_lbl_from`, startCoords, fromLabel, 'start');
+            updateConnectionLabel(`${c.id}_lbl_to`, endCoords, toLabel, 'end');
         }
     });
 }
@@ -66,7 +114,11 @@ export function deleteConnection(connectionId) {
     const index = state.connections.findIndex(c => c.id === connectionId);
     if (index > -1) {
         state.connections.splice(index, 1);
+        const safeId = connectionId.replace(/[^a-zA-Z0-9_-]/g, '_');
         document.getElementById(connectionId)?.remove();
+        document.getElementById(`${connectionId}_hit`)?.remove();
+        document.getElementById(`${safeId}_lbl_from`)?.remove();
+        document.getElementById(`${safeId}_lbl_to`)?.remove();
     }
 }
 

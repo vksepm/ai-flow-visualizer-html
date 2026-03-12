@@ -148,8 +148,12 @@ export function deleteNode(nodeId) {
     const nodeIndex = state.nodes.findIndex(n => n.id === nodeId); if (nodeIndex === -1) return;
 
     state.connections = state.connections.filter(c => {
-        if(c.fromNode === nodeId || c.toNode === nodeId) {
+        if (c.fromNode === nodeId || c.toNode === nodeId) {
+            const safeId = c.id.replace(/[^a-zA-Z0-9_-]/g, '_');
             document.getElementById(c.id)?.remove();
+            document.getElementById(`${c.id}_hit`)?.remove();
+            document.getElementById(`${safeId}_lbl_from`)?.remove();
+            document.getElementById(`${safeId}_lbl_to`)?.remove();
             return false;
         }
         return true;
