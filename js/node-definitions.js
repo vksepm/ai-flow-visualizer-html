@@ -157,7 +157,7 @@ export const NODE_DEFINITIONS = {
             <p>Manages state/history across runs.</p>
             <button class="node-internal-button clear-history-btn">Clear History</button>
             <label>Current Items:</label>
-            <pre class="node-output-preview history-count">0</pre>
+            <pre class="node-output-preview history-count output-with-copy">0</pre>
         `,
         inputs: [{ name: 'Append Input', dataType: 'any'}],
         outputs: [{ name: 'History (Array)', dataType: 'array'}]
